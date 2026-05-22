@@ -15,6 +15,79 @@ SURREAL_IMAGE=surrealdb/surrealdb:nightly bun tests/diskann.ts all
 
 ---
 
+## Background - why this exists
+
+I run a knowledge-graph vector workload in production: ~141,000 embeddings
+(2560-dim), continuously updated, queried for semantic search and entity
+enrichment. It runs on SurrealDB - marketed as a vector-native, multi-model
+database.
+
+### The production cost: an OOM every ~2 days
+
+SurrealDB's vector indexes (HNSW) are held **entirely in process memory** -
+no cache cap. The index, its working set, and the RocksDB structures all live
+in RSS, under one pod memory limit. At our scale that meant:
+
+- SurrealDB pod **OOMKilled every ~1.5-2 days** - 8 kills in 11 days.
+- RSS climbing **25 → 40 GiB** (the pod limit) and dying - while the query-heap
+  number the `SURREAL_MEMORY_THRESHOLD` guard actually watches stayed at only
+  6-9 GiB. The growth is *resident index structure*, not query load, so the
+  guard never fires.
+- Worse: once RSS crosses the memory threshold, **index compaction is itself
+  rejected** - a guard that, once tripped, ratchets memory *up* instead of
+  relieving it.
+- One HNSW index over 147k of our vectors is **~8.5 GiB resident** after build,
+  **~11.4 GiB** after a query load (`bun tests/hnsw.ts`).
+- Query latency under load: p50 ~31 ms, **p95 ~11.5 s** - read-lock starvation
+  inside HNSW search.
+
+The obvious levers - cap the RocksDB block cache, `F64→F32` vectors (halves the
+vector bytes), a bigger pod - only treat symptoms. The real problem is
+structural: **an embedded ANN index whose memory is unbounded.**
+
+### Why pgvector is the obvious escape - and its cost
+
+Postgres + pgvector is disk-based. The index and table live on disk; Postgres
+caches hot pages in a **fixed `shared_buffers`**. Memory is a config number you
+set, not a function of data size.
+
+| | SurrealDB HNSW | Postgres + pgvector |
+|---|---|---|
+| index location | resident in process | on disk, paged |
+| RAM used | grows with data → **OOM** | fixed `shared_buffers` (~4 GiB) |
+| our 141k × 2560 vectors | ~8-11 GiB resident, climbing | ~3 GB on disk, ~4 GiB cache ceiling |
+| failure mode | OOMKill cycle | slow query if cache undersized |
+
+pgvector makes memory **bounded and boring**. But it is a migration - vector
+search moves out of SurrealDB, away from the graph traversal it sits next to,
+into a second system to operate and keep in sync.
+
+### Why we got excited about DiskANN
+
+Then SurrealDB v3.1 shipped **DiskANN**. From their own docs:
+
+> *"vectors and graph structure are persisted in the key-value store and paged
+> through a bounded cache, trading some latency for a much larger working set
+> … designed for very large embedding sets where HNSW's full in-memory
+> approach becomes impractical."*
+
+That is **exactly pgvector's disk-paged, bounded-memory property - inside
+SurrealDB.** No migration, no second database, no split from the graph: swap
+`HNSW` → `DISKANN` and the OOM problem is gone. We were ready to celebrate.
+
+### Why we're not celebrating
+
+DiskANN doesn't work. This repo is what we found when we tried it - an index
+that builds, reports `ready`, then **non-deterministically fails every KNN
+query**.
+
+So: HNSW OOMs, pgvector means a migration, and DiskANN - the in-SurrealDB
+answer - is broken. That is the story these tests tell, and why this repo
+exists: a precise, reproducible record, so the next person evaluating
+SurrealDB for vector search doesn't have to learn it in production.
+
+---
+
 ## Verdict (2026-05-22)
 
 | Index | Image(s) | Production-ready? |
