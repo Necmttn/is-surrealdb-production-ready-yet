@@ -1,0 +1,122 @@
+[
+  {
+    "backend": "memory",
+    "N": 250,
+    "defOk": true,
+    "indexStatus": "ready",
+    "knnOk": 20,
+    "knnFail": 0,
+    "knnErr": "",
+    "logErr": ""
+  },
+  {
+    "backend": "memory",
+    "N": 500,
+    "defOk": true,
+    "indexStatus": "ready",
+    "knnOk": 1,
+    "knnFail": 19,
+    "knnErr": "DiskANN KNN search failed",
+    "logErr": ""
+  },
+  {
+    "backend": "memory",
+    "N": 1000,
+    "defOk": true,
+    "indexStatus": "ready",
+    "knnOk": 1,
+    "knnFail": 19,
+    "knnErr": "DiskANN KNN search failed",
+    "logErr": ""
+  },
+  {
+    "backend": "memory",
+    "N": 2000,
+    "defOk": true,
+    "indexStatus": "ready",
+    "knnOk": 1,
+    "knnFail": 19,
+    "knnErr": "DiskANN KNN search failed",
+    "logErr": ""
+  },
+  {
+    "backend": "surrealkv",
+    "N": 250,
+    "defOk": true,
+    "indexStatus": "ready",
+    "knnOk": 20,
+    "knnFail": 0,
+    "knnErr": "",
+    "logErr": ""
+  },
+  {
+    "backend": "surrealkv",
+    "N": 500,
+    "defOk": true,
+    "indexStatus": "ready",
+    "knnOk": 1,
+    "knnFail": 19,
+    "knnErr": "DiskANN KNN search failed",
+    "logErr": ""
+  },
+  {
+    "backend": "surrealkv",
+    "N": 1000,
+    "defOk": true,
+    "indexStatus": "ready",
+    "knnOk": 2,
+    "knnFail": 18,
+    "knnErr": "DiskANN KNN search failed",
+    "logErr": ""
+  },
+  {
+    "backend": "surrealkv",
+    "N": 2000,
+    "defOk": true,
+    "indexStatus": "ready",
+    "knnOk": 1,
+    "knnFail": 19,
+    "knnErr": "DiskANN KNN search failed",
+    "logErr": ""
+  },
+  {
+    "backend": "rocksdb",
+    "N": 250,
+    "defOk": true,
+    "indexStatus": "ready",
+    "knnOk": 20,
+    "knnFail": 0,
+    "knnErr": "",
+    "logErr": ""
+  },
+  {
+    "backend": "rocksdb",
+    "N": 500,
+    "defOk": true,
+    "indexStatus": "ready",
+    "knnOk": 1,
+    "knnFail": 19,
+    "knnErr": "DiskANN KNN search failed",
+    "logErr": ""
+  },
+  {
+    "backend": "rocksdb",
+    "N": 1000,
+    "defOk": true,
+    "indexStatus": "ready",
+    "knnOk": 2,
+    "knnFail": 18,
+    "knnErr": "DiskANN KNN search failed",
+    "logErr": ""
+  },
+  {
+    "backend": "rocksdb",
+    "N": 2000,
+    "defOk": true,
+    "indexStatus": "ready",
+    "knnOk": 1,
+    "knnFail": 19,
+    "knnErr": "DiskANN KNN search failed",
+    "logErr": ""
+  }
+]

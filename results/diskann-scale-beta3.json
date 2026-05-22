@@ -1,0 +1,68 @@
+[
+  {
+    "N": 100,
+    "realCount": 100,
+    "defOk": true,
+    "buildSecs": "2.1",
+    "indexStatus": "ready",
+    "knnOk": 0,
+    "knnFail": 20,
+    "knnErr": "DiskANN KNN search failed",
+    "logErr": ""
+  },
+  {
+    "N": 250,
+    "realCount": 250,
+    "defOk": true,
+    "buildSecs": "2.3",
+    "indexStatus": "ready",
+    "knnOk": 20,
+    "knnFail": 0,
+    "knnErr": "",
+    "logErr": ""
+  },
+  {
+    "N": 500,
+    "realCount": 500,
+    "defOk": true,
+    "buildSecs": "2.1",
+    "indexStatus": "ready",
+    "knnOk": 20,
+    "knnFail": 0,
+    "knnErr": "",
+    "logErr": ""
+  },
+  {
+    "N": 1000,
+    "realCount": 1000,
+    "defOk": true,
+    "buildSecs": "2.1",
+    "indexStatus": "ready",
+    "knnOk": 1,
+    "knnFail": 19,
+    "knnErr": "DiskANN KNN search failed",
+    "logErr": ""
+  },
+  {
+    "N": 2000,
+    "realCount": 2000,
+    "defOk": true,
+    "buildSecs": "2.1",
+    "indexStatus": "ready",
+    "knnOk": 3,
+    "knnFail": 17,
+    "knnErr": "DiskANN KNN search failed",
+    "logErr": "2026-05-22T01:44:31.609765Z WARN surrealdb_core::kvs::ds: Index compaction NS: 1 - DB: 0 - TB: vec - IX: 3 fails: ANNError: DiskANN(IndexError) DiskANN element 1558 is missing -- (surrealdb/core/src/i"
+  },
+  {
+    "N": 5000,
+    "realCount": 5000,
+    "defOk": true,
+    "buildSecs": "2.1",
+    "indexStatus": "ready",
+    "knnOk": 1,
+    "knnFail": 19,
+    "knnErr": "DiskANN KNN search failed",
+    "logErr": "2026-05-22T01:44:57.278614Z WARN surrealdb_core::kvs::ds: Index compaction NS: 1 - DB: 0 - TB: vec - IX: 4 fails: ANNError: DiskANN(IndexError) DiskANN element 2801 is missing -- (surrealdb/core/src/i"
+  }
+]

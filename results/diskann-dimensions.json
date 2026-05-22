@@ -1,0 +1,50 @@
+[
+  {
+    "dim": 4,
+    "defOk": true,
+    "indexStatus": "ready",
+    "knnOk": 20,
+    "knnFail": 0,
+    "knnErr": ""
+  },
+  {
+    "dim": 64,
+    "defOk": true,
+    "indexStatus": "ready",
+    "knnOk": 20,
+    "knnFail": 0,
+    "knnErr": ""
+  },
+  {
+    "dim": 256,
+    "defOk": true,
+    "indexStatus": "ready",
+    "knnOk": 20,
+    "knnFail": 0,
+    "knnErr": ""
+  },
+  {
+    "dim": 768,
+    "defOk": true,
+    "indexStatus": "ready",
+    "knnOk": 20,
+    "knnFail": 0,
+    "knnErr": ""
+  },
+  {
+    "dim": 1536,
+    "defOk": true,
+    "indexStatus": "ready",
+    "knnOk": 1,
+    "knnFail": 19,
+    "knnErr": "DiskANN KNN search failed"
+  },
+  {
+    "dim": 2560,
+    "defOk": true,
+    "indexStatus": "ready",
+    "knnOk": 0,
+    "knnFail": 20,
+    "knnErr": "empty"
+  }
+]
