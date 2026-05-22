@@ -9,6 +9,28 @@
      |___|
 ```
 
+## TL;DR
+
+```
+   ███╗   ██╗ ██████╗
+   ████╗  ██║██╔═══██╗
+   ██╔██╗ ██║██║   ██║     SurrealDB is NOT production-ready
+   ██║╚██╗██║██║   ██║     for vector search  (2026-05-22)
+   ██║ ╚████║╚██████╔╝
+   ╚═╝  ╚═══╝ ╚═════╝
+```
+
+- **DiskANN** (`v3.1.0-beta.3` + `nightly`) - KNN search **non-deterministically
+  fails**: the index builds, reports `ready`, then errors on ~95-100% of
+  queries with `DiskANN KNN search failed`. Broken on every backend, image,
+  data set and dimension we tried.
+- **HNSW** - works, but holds the whole index **resident in RAM** (unbounded →
+  OOMKill in production) and has a **p95 latency cliff (~11.5 s)** under load.
+
+Full test matrix and the production story below.
+
+---
+
 Reproducible tests + benchmarks for the SurrealDB **vector-index** behaviour we
 hit running a real workload (~141k embeddings, 2560-dim) in production.
 
@@ -100,15 +122,6 @@ SurrealDB for vector search doesn't have to learn it in production.
 ---
 
 ## Verdict (2026-05-22)
-
-```
-   ███╗   ██╗ ██████╗
-   ████╗  ██║██╔═══██╗
-   ██╔██╗ ██║██║   ██║      not production ready for vector search
-   ██║╚██╗██║██║   ██║      v3.1.0-beta.3 · nightly (2026-05-21)
-   ██║ ╚████║╚██████╔╝
-   ╚═╝  ╚═══╝ ╚═════╝
-```
 
 | Index | Image(s) | Production-ready? |
 |-------|----------|-------------------|
