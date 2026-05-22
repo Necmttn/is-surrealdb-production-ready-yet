@@ -8,7 +8,7 @@ import {
   startSurreal, randomUnitVector, loadVectors, buildIndex, knnProbe, IMAGE,
   type Backend,
 } from "../lib/harness.ts";
-import { banner, heading, spinner, table, paint } from "../lib/tui.ts";
+import { banner, heading, spinner, table, paint, verdictArt } from "../lib/tui.ts";
 
 const F32 = (dim: number) =>
   `DISKANN DIMENSION ${dim} DIST COSINE TYPE F32 DEGREE 64 L_BUILD 100 ALPHA 1.2`;
@@ -129,11 +129,11 @@ for (const name of toRun) {
   );
   totalFail += rows.filter((r) => r.verdict === "fail").length;
 }
+verdictArt(totalFail === 0);
 console.log(
-  "\n" +
-    (totalFail === 0
-      ? paint("  all DiskANN cases passed", "green", "bold")
-      : paint(`  ${totalFail} DiskANN case(s) failed - KNN search broken`, "red", "bold")) +
+  (totalFail === 0
+    ? paint("  all DiskANN cases passed", "green", "bold")
+    : paint(`  ${totalFail} DiskANN case(s) failed - DiskANN KNN search is broken`, "red", "bold")) +
     "\n",
 );
 process.exit(totalFail === 0 ? 0 : 1);

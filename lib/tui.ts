@@ -81,3 +81,30 @@ export function table(cols: Col[], rows: Record<string, unknown>[], verdict?: (r
 }
 
 export const heading = (s: string) => console.log("\n" + paint("▍ " + s, "magenta", "bold"));
+
+const ART_NO = [
+  "███╗   ██╗ ██████╗ ",
+  "████╗  ██║██╔═══██╗",
+  "██╔██╗ ██║██║   ██║",
+  "██║╚██╗██║██║   ██║",
+  "██║ ╚████║╚██████╔╝",
+  "╚═╝  ╚═══╝ ╚═════╝ ",
+];
+const ART_YES = [
+  "██╗   ██╗███████╗███████╗",
+  "╚██╗ ██╔╝██╔════╝██╔════╝",
+  " ╚████╔╝ █████╗  ███████╗",
+  "  ╚██╔╝  ██╔══╝  ╚════██║",
+  "   ██║   ███████╗███████║",
+  "   ╚═╝   ╚══════╝╚══════╝",
+];
+
+/** Big block-letter verdict: is it production ready? */
+export function verdictArt(passed: boolean): void {
+  const art = passed ? ART_YES : ART_NO;
+  const color: keyof typeof C = passed ? "green" : "red";
+  console.log("\n  " + paint("is surrealdb production ready yet?", "dim"));
+  console.log("");
+  for (const l of art) console.log("   " + paint(l, color, "bold"));
+  console.log("");
+}

@@ -1,5 +1,14 @@
 # is-surrealdb-production-ready-yet
 
+```
+       ___
+      /   /|      IS  SURREALDB
+     /___/ |      P R O D U C T I O N   R E A D Y   Y E T ?
+     |   | /      ─────────────────────────────────────────
+     |   |/       vector-index reproducible test suite
+     |___|
+```
+
 Reproducible tests + benchmarks for the SurrealDB **vector-index** behaviour we
 hit running a real workload (~141k embeddings, 2560-dim) in production.
 
@@ -91,6 +100,15 @@ SurrealDB for vector search doesn't have to learn it in production.
 ---
 
 ## Verdict (2026-05-22)
+
+```
+   ███╗   ██╗ ██████╗
+   ████╗  ██║██╔═══██╗
+   ██╔██╗ ██║██║   ██║      not production ready for vector search
+   ██║╚██╗██║██║   ██║      v3.1.0-beta.3 · nightly (2026-05-21)
+   ██║ ╚████║╚██████╔╝
+   ╚═╝  ╚═══╝ ╚═════╝
+```
 
 | Index | Image(s) | Production-ready? |
 |-------|----------|-------------------|
