@@ -28,16 +28,18 @@ SurrealDB's vector indexes (HNSW) are held **entirely in process memory** -
 no cache cap. The index, its working set, and the RocksDB structures all live
 in RSS, under one pod memory limit. At our scale that meant:
 
-- SurrealDB pod **OOMKilled every ~1.5-2 days** - 8 kills in 11 days.
-- RSS climbing **25 → 40 GiB** (the pod limit) and dying - while the query-heap
-  number the `SURREAL_MEMORY_THRESHOLD` guard actually watches stayed at only
-  6-9 GiB. The growth is *resident index structure*, not query load, so the
-  guard never fires.
-- Worse: once RSS crosses the memory threshold, **index compaction is itself
-  rejected** - a guard that, once tripped, ratchets memory *up* instead of
-  relieving it.
+- SurrealDB pod **OOMKilled (exit 137) repeatedly** - 7 kills inside one
+  11-day window, on a **40 GiB** pod limit.
+- `SURREAL_MEMORY_THRESHOLD` (set to 20 GiB) is meant to abort heavy queries
+  *before* the kill. Instead it backfires: once memory parks above the
+  threshold, **index compaction is rejected too**, so uncompacted index
+  segments pile up and memory only climbs. A guard that, once tripped,
+  **ratchets memory up to the 40 GiB limit** instead of relieving it -
+  turning a clean crash into a multi-hour brownout of `HTTP 400` query
+  rejections.
 - One HNSW index over 147k of our vectors is **~8.5 GiB resident** after build,
-  **~11.4 GiB** after a query load (`bun tests/hnsw.ts`).
+  **~11.4 GiB** after a query load (`bun tests/hnsw.ts`) - and it keeps
+  climbing under continuous write load.
 - Query latency under load: p50 ~31 ms, **p95 ~11.5 s** - read-lock starvation
   inside HNSW search.
 
