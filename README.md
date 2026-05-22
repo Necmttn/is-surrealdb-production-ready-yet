@@ -28,6 +28,7 @@
   OOMKill in production) and has a **p95 latency cliff (~11.5 s)** under load.
 
 Full test matrix and the production story below.
+**Upstream issue:** [surrealdb/surrealdb#7318](https://github.com/surrealdb/surrealdb/issues/7318)
 
 ---
 
