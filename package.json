@@ -2,13 +2,14 @@
   "name": "is-surrealdb-production-ready-yet",
   "version": "0.1.0",
   "private": false,
-  "description": "Reproducible tests + benchmarks for SurrealDB vector-index behaviour (DiskANN / HNSW).",
+  "description": "Reproducible tests + benchmarks for SurrealDB vector-index behaviour (DiskANN / HNSW). Run with Bun.",
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "diskann": "node tests/diskann.mjs all",
-    "diskann:reliability": "node tests/diskann.mjs reliability",
-    "hnsw": "node tests/hnsw.mjs"
+    "test": "bun tests/diskann.ts all",
+    "diskann": "bun tests/diskann.ts all",
+    "diskann:reliability": "bun tests/diskann.ts reliability",
+    "hnsw": "bun tests/hnsw.ts"
   },
-  "engines": { "node": ">=20" }
+  "engines": { "bun": ">=1.1" }
 }
