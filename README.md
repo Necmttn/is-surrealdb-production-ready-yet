@@ -15,7 +15,7 @@
    ██╗   ██╗███████╗███████╗
    ╚██╗ ██╔╝██╔════╝██╔════╝     DiskANN: fixed in v3.1.0 stable
     ╚████╔╝ █████╗  ███████╗     HNSW: still unbounded RAM + p95 cliff
-     ╚██╔╝  ██╔══╝  ╚════██║     (2026-05-23)
+     ╚██╔╝  ██╔══╝  ╚════██║     (2026-05-28)
       ██║   ███████╗███████║
       ╚═╝   ╚══════╝╚══════╝
 ```
@@ -125,7 +125,7 @@ SurrealDB for vector search doesn't have to learn it in production.
 
 ---
 
-## Verdict (2026-05-23)
+## Verdict (2026-05-28)
 
 | Index | Image | Production-ready? |
 |-------|-------|-------------------|
