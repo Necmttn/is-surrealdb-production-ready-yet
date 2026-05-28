@@ -12,23 +12,26 @@
 ## TL;DR
 
 ```
-   ███╗   ██╗ ██████╗
-   ████╗  ██║██╔═══██╗
-   ██╔██╗ ██║██║   ██║     SurrealDB is NOT production-ready
-   ██║╚██╗██║██║   ██║     for vector search  (2026-05-22)
-   ██║ ╚████║╚██████╔╝
-   ╚═╝  ╚═══╝ ╚═════╝
+   ██╗   ██╗███████╗███████╗
+   ╚██╗ ██╔╝██╔════╝██╔════╝     DiskANN: fixed in v3.1.0 stable
+    ╚████╔╝ █████╗  ███████╗     HNSW: still unbounded RAM + p95 cliff
+     ╚██╔╝  ██╔══╝  ╚════██║     (2026-05-23)
+      ██║   ███████╗███████║
+      ╚═╝   ╚══════╝╚══════╝
 ```
 
-- **DiskANN** (`v3.1.0-beta.3` + `nightly`) - KNN search **non-deterministically
-  fails**: the index builds, reports `ready`, then errors on ~95-100% of
-  queries with `DiskANN KNN search failed`. Broken on every backend, image,
-  data set and dimension we tried.
+- **DiskANN** - was broken on `v3.1.0-beta.3` + `nightly` (~95% KNN fail,
+  non-deterministic). **Fixed in `v3.1.0` stable** - full matrix now passes
+  20/20 across reliability, scale (100->5000), dimensions (4->2560), and all
+  three backends (`memory` / `surrealkv` / `rocksdb`). Re-run:
+  `SURREAL_IMAGE=surrealdb/surrealdb:v3.1.0 bun tests/diskann.ts all`.
 - **HNSW** - works, but holds the whole index **resident in RAM** (unbounded →
   OOMKill in production) and has a **p95 latency cliff (~11.5 s)** under load.
+  Structural, not a bug.
 
 Full test matrix and the production story below.
 **Upstream issue:** [surrealdb/surrealdb#7318](https://github.com/surrealdb/surrealdb/issues/7318)
+- **fixed in `v3.1.0` stable**.
 
 ---
 
@@ -122,12 +125,13 @@ SurrealDB for vector search doesn't have to learn it in production.
 
 ---
 
-## Verdict (2026-05-22)
+## Verdict (2026-05-23)
 
-| Index | Image(s) | Production-ready? |
-|-------|----------|-------------------|
-| **DiskANN** | `v3.1.0-beta.3`, `nightly` | **No** - KNN search non-deterministically fails |
-| **HNSW** | `v3.0.x`, `v3.1.x` | Works, but unbounded memory + p95 latency cliff |
+| Index | Image | Production-ready? |
+|-------|-------|-------------------|
+| **DiskANN** | `v3.1.0` stable | **Yes** - full matrix passes 20/20 |
+| **DiskANN** | `v3.1.0-beta.3`, `nightly` (pre-stable) | No - non-deterministic KNN failure ([#7318](https://github.com/surrealdb/surrealdb/issues/7318), now fixed upstream) |
+| **HNSW** | `v3.0.x`, `v3.1.x` | Works, but unbounded RAM + p95 latency cliff (structural) |
 
 ---
 
