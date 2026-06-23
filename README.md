@@ -13,25 +13,41 @@
 
 ```
    ██╗   ██╗███████╗███████╗
-   ╚██╗ ██╔╝██╔════╝██╔════╝     DiskANN: fixed in v3.1.0 stable
-    ╚████╔╝ █████╗  ███████╗     HNSW: still unbounded RAM + p95 cliff
-     ╚██╔╝  ██╔══╝  ╚════██║     (2026-05-28)
-      ██║   ███████╗███████║
+   ╚██╗ ██╔╝██╔════╝██╔════╝     DiskANN: fixed v3.1.0+ (re-confirmed v3.1.3)
+    ╚████╔╝ █████╗  ███████╗     HNSW: p95 cliff under load (structural)
+     ╚██╔╝  ██╔══╝  ╚════██║     Memory: bounded - caps existed all along, just
+      ██║   ███████╗███████║              undocumented (2026-06-23)
       ╚═╝   ╚══════╝╚══════╝
 ```
 
 - **DiskANN** - was broken on `v3.1.0-beta.3` + `nightly` (~95% KNN fail,
-  non-deterministic). **Fixed in `v3.1.0` stable** - full matrix now passes
-  20/20 across reliability, scale (100->5000), dimensions (4->2560), and all
-  three backends (`memory` / `surrealkv` / `rocksdb`). Re-run:
-  `SURREAL_IMAGE=surrealdb/surrealdb:v3.1.0 bun tests/diskann.ts all`.
-- **HNSW** - works, but holds the whole index **resident in RAM** (unbounded →
-  OOMKill in production) and has a **p95 latency cliff (~11.5 s)** under load.
-  Structural, not a bug.
+  non-deterministic). **Fixed in `v3.1.0` stable**, **re-confirmed on `v3.1.3`** -
+  full matrix passes 20/20 across reliability, scale (100→5000), dimensions
+  (4→2560), and all three backends (`memory` / `surrealkv` / `rocksdb`). Re-run:
+  `SURREAL_IMAGE=surrealdb/surrealdb:v3.1.3 bun tests/diskann.ts all`.
+- **HNSW** - works. Still has a **p95 latency cliff (~21s on synthetic 20k,
+  ~25-45s on prod 147k)** under concurrent load. Structural, not a bug.
+- **Memory** - original claim "unbounded, no cap" was wrong. Both indexes
+  have explicit env-var caps that have shipped since v3.1.0:
+  - `SURREAL_HNSW_CACHE_SIZE` (default 128 MiB)
+  - `SURREAL_DISKANN_CACHE_SIZE` (default 256 MiB)
 
-Full test matrix and the production story below.
-**Upstream issue:** [surrealdb/surrealdb#7318](https://github.com/surrealdb/surrealdb/issues/7318)
-- **fixed in `v3.1.0` stable**.
+  Neither is documented yet (per upstream maintainer reply on [#7337](https://github.com/surrealdb/surrealdb/issues/7337)).
+  The graph + full-precision vectors live in RocksDB (KV) as source of truth;
+  the cache holds the hot working set; cold nodes stream from KV on demand.
+  Setting `SURREAL_DISKANN_CACHE_SIZE=512MiB` explicitly on a 147k × 2560-dim
+  prod-distribution workload cut RSS post-query from **13.85 → 5.85 GiB** and
+  dropped p50 latency from **10.4s → 79ms**. The RSS that *does* climb is
+  mostly jemalloc page retention and RocksDB SST mmap, not the index cache.
+- **OOM-cycle under writes** - RSS climbs ~+4-5 GiB transiently during
+  sustained write load (compaction backlog scan), then drops once compaction
+  catches up. v3.2.0 shards the pending-updates set so this transient is
+  bounded by per-shard backlog rather than total backlog. Until then, throttle
+  ingest concurrency.
+
+**Upstream issues:**
+- [surrealdb/surrealdb#7318](https://github.com/surrealdb/surrealdb/issues/7318) - DiskANN KNN search failure (fixed in `v3.1.0` stable; **re-confirmed on `v3.1.3`**)
+- [surrealdb/surrealdb#7337](https://github.com/surrealdb/surrealdb/issues/7337) - DiskANN memory model + docs gap (cap exists since v3.1.0, just undocumented)
 
 ---
 
@@ -58,6 +74,18 @@ enrichment. It runs on SurrealDB - marketed as a vector-native, multi-model
 database.
 
 ### The production cost: an OOM every ~2 days
+
+**Update 2026-06-23**: the original claim below - "no cache cap" - was wrong.
+`SURREAL_HNSW_CACHE_SIZE` (default 128 MiB) and `SURREAL_DISKANN_CACHE_SIZE`
+(default 256 MiB) have shipped since v3.1.0; both are operator-configurable.
+They aren't documented yet (per maintainer reply on
+[#7337](https://github.com/surrealdb/surrealdb/issues/7337)), which is why
+they didn't surface when this repo first went looking. The brownouts described
+below are real, but the root cause is the *compaction backlog scan* under
+sustained writes - not unbounded index growth. Updated guidance is in the
+TL;DR; the original story is preserved verbatim below for the record.
+
+---
 
 SurrealDB's vector indexes (HNSW) are held **entirely in process memory** -
 no cache cap. The index, its working set, and the RocksDB structures all live
@@ -125,13 +153,13 @@ SurrealDB for vector search doesn't have to learn it in production.
 
 ---
 
-## Verdict (2026-05-28)
+## Verdict (2026-06-23)
 
 | Index | Image | Production-ready? |
 |-------|-------|-------------------|
-| **DiskANN** | `v3.1.0` stable | **Yes** - full matrix passes 20/20 |
-| **DiskANN** | `v3.1.0-beta.3`, `nightly` (pre-stable) | No - non-deterministic KNN failure ([#7318](https://github.com/surrealdb/surrealdb/issues/7318), now fixed upstream) |
-| **HNSW** | `v3.0.x`, `v3.1.x` | Works, but unbounded RAM + p95 latency cliff (structural) |
+| **DiskANN** | `v3.1.0` stable, `v3.1.3` | **Yes** - full matrix passes 20/20 on both |
+| **DiskANN** | `v3.1.0-beta.3`, `nightly` (pre-stable) | No - non-deterministic KNN failure ([#7318](https://github.com/surrealdb/surrealdb/issues/7318), fixed upstream) |
+| **HNSW** | `v3.0.x`, `v3.1.x` | Works. p95 latency cliff (structural). Memory bounded via `SURREAL_HNSW_CACHE_SIZE` (see [#7337](https://github.com/surrealdb/surrealdb/issues/7337) for the memory model) |
 
 ---
 
