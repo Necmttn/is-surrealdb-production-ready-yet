@@ -179,6 +179,44 @@ DiskANN element 1000 is missing -- (core/src/idx/trees/diskann/provider.rs:594)
 
 `✅` = 20/20 KNN queries succeeded · `❌` = mostly/all failed · all DiskANN F32, COSINE, defaults.
 
+#### Fixed: `v3.1.0` stable and `v3.1.3` (re-confirmed 2026-06-23)
+
+Both images pass every cell.
+
+**Vector count** (dim 2560, `memory` backend):
+
+| N | 100 | 250 | 500 | 1 000 | 2 000 | 5 000 |
+|---|-----|-----|-----|-------|-------|-------|
+| KNN | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+**Dimension** (N = 1 000, `memory` backend):
+
+| dim | 4 | 64 | 256 | 768 | 1 536 | 2 560 |
+|-----|---|----|----|-----|-------|-------|
+| KNN | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+**Storage backend** (N = 1 000, dim 2 560):
+
+| backend | `memory` | `surrealkv` | `rocksdb` |
+|---------|----------|-------------|-----------|
+| KNN | ✅ | ✅ | ✅ |
+
+**Reliability** (N = 1 000, dim 2 560 - identical setup, repeated):
+
+| run | 1 | 2 | 3 | 4 | 5 |
+|-----|---|---|---|---|---|
+| KNN | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+Reproduce:
+
+```bash
+SURREAL_IMAGE=surrealdb/surrealdb:v3.1.3 bun tests/diskann.ts all
+```
+
+#### Broken: `v3.1.0-beta.3` (2026-05-14) and `nightly` (2026-05-21) - historical record
+
+These pre-stable images are what the bug was originally filed against ([#7318](https://github.com/surrealdb/surrealdb/issues/7318)). The cells below were captured at the time of filing and are preserved for the historical record. Re-running these images today is pointless; the bug is fixed.
+
 **Vector count** (dim 2560, `memory` backend):
 
 | N | 100 | 250 | 500 | 1 000 | 2 000 | 5 000 | 147 000 |
@@ -202,8 +240,6 @@ DiskANN element 1000 is missing -- (core/src/idx/trees/diskann/provider.rs:594)
 | run | 1 | 2 | 3 | 4 | 5 |
 |-----|---|---|---|---|---|
 | KNN | ❌ | ❌ | ❌ | ❌ | ❌ |
-
-**Image:** fails on both `v3.1.0-beta.3` (2026-05-14) and `nightly` (2026-05-21).
 
 ### Reading the matrix
 
